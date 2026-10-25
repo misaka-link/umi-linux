@@ -751,39 +751,44 @@
 	// };
 };
 
-//TODO: There are some issues with DSC CMD Mode that need to be fixed,https://gitlab.freedesktop.org/drm/msm/-/issues/42
-// &mdss {
-//  	status = "okay";
-// };
- 
-// &mdss_dsi0 {
-// 	vdda-supply = <&vreg_l9a_1p2>;
-// 	qcom,master-dsi;
-//  	status = "okay";
- 
-//  	display_panel: panel@0 {
-//  		reg = <0>;
-// 		vddio-supply = <&vreg_l14a_1p88>;
-//  		reset-gpios = <&tlmm 12 0>;
-		
-// 		port {
-// 			panel_in: endpoint {
-// 				remote-endpoint = <&mdss_dsi0_out>;
-// 			};
-// 		};
-//  	};
-// };
- 
-// &mdss_dsi0_out {
-//  	data-lanes = <0 1 2 3>;
-//  	remote-endpoint = <&panel_in>;
-// };
+/*
+ * Display: 1080x2340 command-mode AMOLED with DSC 1.1.
+ *
+ * 面板驱动见 0001-drm-panel-xiaomi-umi.patch；时序 / DCS on-off 序列 /
+ * panel-id 全部由 xiaomi-umi-panels.dtsi 提供，一个驱动覆盖小米 10 出厂
+ * 的所有面板变体（Samsung J2 / CSOT / ...）。
+ *
+ * 已知问题：DSC + cmd mode 在 msm 上还有 tearing/时序报告
+ *   https://gitlab.freedesktop.org/drm/msm/-/issues/42
+ * 偶发开机黑屏时，用驱动自带的救援开关重发 on 序列即可，不必重启：
+ *   echo 1 > /sys/devices/platform/soc@0/ae00000.display-subsystem/ae94000.dsi/ae94000.dsi.0/repower
+ */
+#include "xiaomi-umi-panels.dtsi"
 
-// &mdss_dsi0_phy {
-// 	vdds-supply = <&vreg_l5a_0p88>;
-// 	status = "okay";
-// };
- 
+&mdss {
+	status = "okay";
+};
+
+&mdss_dsi0 {
+	vdda-supply = <&vreg_l9a_1p2>;
+	status = "okay";
+};
+
+&mdss_dsi0_phy {
+	vdds-supply = <&vreg_l5a_0p88>;
+	status = "okay";
+};
+
+&mdss_dsi0_out {
+	data-lanes = <0 1 2 3>;
+};
+
+&mdss_dsi0 {
+	umi-panel@0 {
+		reset-gpios = <&tlmm 12 GPIO_ACTIVE_HIGH>;
+	};
+};
+
 &pcie0 {
 	status = "okay";
 };
